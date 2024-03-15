@@ -1,13 +1,7 @@
-/*
-  Rui Santos
-  Complete project details at https://RandomNerdTutorials.com/esp32-web-server-microsd-card/
-  
-  Permission is hereby granted, free of charge, to any person obtaining a copy
-  of this software and associated documentation files.
-  
-  The above copyright notice and this permission notice shall be included in all
-  copies or substantial portions of the Software.
-*/
+/* ____                                        _      __   ____   ___
+  / __/ ___   ____ _  __ ___  __ __  ____     | | /| / /  / __/  / _ )
+ _\ \  / -_) / __/| |/ // -_)/ // / / __/     | |/ |/ /  / _/   / _  |
+/___/  \__/ /_/   |___/ \__/ \_,_/ /_/        |__/|__/  /___/  /____/ */
 
 #include <Arduino.h>
 #include <WiFi.h>
@@ -17,15 +11,23 @@
 #include "SD.h"
 #include "SPI.h"
 
+/*Port SPI*/
+#define SCK  18
+#define MISO  19
+#define MOSI  23
+#define CS  32
+
 // Replace with your network credentials
-const char* ssid = "REPLACE_WITH_YOUR_SSID";
-const char* password = "REPLACE_WITH_YOUR_PASSWORD";
+const char* ssid = "test";
+const char* password = "btsciel24";
 
 // Create AsyncWebServer object on port 80
 AsyncWebServer server(80);
+SPIClass spi = SPIClass(VSPI);
 
 void initSDCard(){
-  if(!SD.begin()){
+  spi.begin(SCK, MISO, MOSI, CS);
+  if(!SD.begin(CS,spi,80000000)){
     Serial.println("Card Mount Failed");
     return;
   }
@@ -68,8 +70,8 @@ void setup() {
 
   server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
     request->send(SD, "/index.html", "text/html");
+     //server.serveStatic("/Serv/index.html", SD, "text/html");
   });
-
   server.serveStatic("/", SD, "/");
 
   server.begin();
